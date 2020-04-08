@@ -35,6 +35,8 @@ class GAN():
         , generator_learning_rate
         , optimiser
         , z_dim
+        , preview_rows=5
+        , preview_cols=5
         ):
 
         self.name = 'gan'
@@ -57,9 +59,12 @@ class GAN():
         self.generator_activation = generator_activation
         self.generator_dropout_rate = generator_dropout_rate
         self.generator_learning_rate = generator_learning_rate
-        
+
         self.optimiser = optimiser
         self.z_dim = z_dim
+
+        self.preview_rows = preview_rows
+        self.preview_cols = preview_cols
 
         self.n_layers_discriminator = len(discriminator_conv_filters)
         self.n_layers_generator = len(generator_conv_filters)
@@ -91,26 +96,37 @@ class GAN():
         x = discriminator_input
 
         for i in range(self.n_layers_discriminator):
+            if i<1:
+                x = Conv2D(
+                    filters = self.discriminator_conv_filters[i]
+                    , kernel_size = self.discriminator_conv_kernel_size[i]
+                    , strides = self.discriminator_conv_strides[i]
+                    , padding = 'same'
+                    , name = 'discriminator_conv_' + str(i)
+                    , kernel_initializer = self.weight_init
+                    )(x)
+                x = self.get_activation(self.discriminator_activation)(x)
+            else:
+                if self.discriminator_dropout_rate:
+                    x = Dropout(rate = self.discriminator_dropout_rate)(x)
 
-            x = Conv2D(
-                filters = self.discriminator_conv_filters[i]
-                , kernel_size = self.discriminator_conv_kernel_size[i]
-                , strides = self.discriminator_conv_strides[i]
-                , padding = 'same'
-                , name = 'discriminator_conv_' + str(i)
-                , kernel_initializer = self.weight_init
-                )(x)
+                x = Conv2D(
+                    filters = self.discriminator_conv_filters[i]
+                    , kernel_size = self.discriminator_conv_kernel_size[i]
+                    , strides = self.discriminator_conv_strides[i]
+                    , padding = 'same'
+                    , name = 'discriminator_conv_' + str(i)
+                    , kernel_initializer = self.weight_init
+                    )(x)
 
-            if self.discriminator_batch_norm_momentum and i > 0:
-                x = BatchNormalization(momentum = self.discriminator_batch_norm_momentum)(x)
+                if self.discriminator_batch_norm_momentum and i > 0:
+                    x = BatchNormalization(momentum = self.discriminator_batch_norm_momentum)(x)
 
-            x = self.get_activation(self.discriminator_activation)(x)
+                x = self.get_activation(self.discriminator_activation)(x)
 
-            if self.discriminator_dropout_rate:
-                x = Dropout(rate = self.discriminator_dropout_rate)(x)
-
+        x = Dropout(rate = self.discriminator_dropout_rate)(x)
         x = Flatten()(x)
-        
+
         discriminator_output = Dense(1, activation='sigmoid', kernel_initializer = self.weight_init)(x)
 
         self.discriminator = Model(discriminator_input, discriminator_output)
@@ -124,22 +140,24 @@ class GAN():
 
         x = generator_input
 
-        x = Dense(np.prod(self.generator_initial_dense_layer_size), kernel_initializer = self.weight_init)(x)
+        x = Dense(np.prod(self.generator_initial_dense_layer_size), kernel_initializer = self.weight_init, activation=self.generator_activation)(x)
 
-        if self.generator_batch_norm_momentum:
-            x = BatchNormalization(momentum = self.generator_batch_norm_momentum)(x)
+        # if self.generator_batch_norm_momentum:
+        #     x = BatchNormalization(momentum = self.generator_batch_norm_momentum)(x)
 
-        x = self.get_activation(self.generator_activation)(x)
+        #x = self.get_activation(self.generator_activation)(x)
 
         x = Reshape(self.generator_initial_dense_layer_size)(x)
 
         if self.generator_dropout_rate:
             x = Dropout(rate = self.generator_dropout_rate)(x)
 
-        for i in range(self.n_layers_generator):
 
-            if self.generator_upsample[i] == 2:
-                x = UpSampling2D()(x)
+        for i in range(self.n_layers_generator):
+            # upsample to desired dimensions (using 'size' parameter)
+            if self.generator_upsample[i] > 1:
+                x = UpSampling2D(
+                    size=(self.generator_upsample[i],self.generator_upsample[i]))(x)
                 x = Conv2D(
                     filters = self.generator_conv_filters[i]
                     , kernel_size = self.generator_conv_kernel_size[i]
@@ -148,7 +166,6 @@ class GAN():
                     , kernel_initializer = self.weight_init
                 )(x)
             else:
-
                 x = Conv2DTranspose(
                     filters = self.generator_conv_filters[i]
                     , kernel_size = self.generator_conv_kernel_size[i]
@@ -159,23 +176,120 @@ class GAN():
                     )(x)
 
             if i < self.n_layers_generator - 1:
-
                 if self.generator_batch_norm_momentum:
                     x = BatchNormalization(momentum = self.generator_batch_norm_momentum)(x)
 
                 x = self.get_activation(self.generator_activation)(x)
-                    
-                
             else:
-
                 x = Activation('tanh')(x)
+
+
+        # if self.generator_upsample>1:
+        #     # first n-2 elements of array are to set up Conv2D layers with 2x
+        #     # upsampling per loop
+        #     # n-1 element is for final upsampling to reach desired dimensions
+        #     # final element is number of channels (e.g. RGB)
+        #     for i in range(self.n_layers_generator-2):
+        #         x = UpSampling2D()(x)
+        #         x = Conv2D(
+        #             filters = self.generator_conv_filters[i]
+        #             , kernel_size = self.generator_conv_kernel_size[i]
+        #             , padding = 'same'
+        #             , name = 'generator_conv_' + str(i)
+        #             , kernel_initializer = self.weight_init
+        #         )(x)
+        #         if self.generator_batch_norm_momentum:
+        #             x = BatchNormalization(momentum = self.generator_batch_norm_momentum)(x)
+        #
+        #         x = self.get_activation(self.generator_activation)(x)
+        #
+        #     # upsample to desired dimensions (using 'size' parameter)
+        #     x = UpSampling2D(
+        #         size=(self.generator_upsample,self.generator_upsample)
+        #     )(x)
+        #     x = Conv2D(
+        #         filters = self.generator_conv_filters[self.n_layers_generator-2]
+        #         , kernel_size = self.generator_conv_kernel_size[self.n_layers_generator-2]
+        #         , padding = 'same'
+        #         , name = 'generator_conv_' + str(self.n_layers_generator-2)
+        #         , kernel_initializer = self.weight_init
+        #     )(x)
+        #     if self.generator_batch_norm_momentum:
+        #         x = BatchNormalization(momentum = self.generator_batch_norm_momentum)(x)
+        #
+        #     x = self.get_activation(self.generator_activation)(x)
+        #
+        #     # Final CNN layer
+        #     x = Conv2D(
+        #         filters = self.generator_conv_filters[self.n_layers_generator-1]
+        #         , kernel_size = self.generator_conv_kernel_size[self.n_layers_generator-1]
+        #         , padding = 'same'
+        #         , name = 'generator_conv_' + str(self.n_layers_generator-1)
+        #         , kernel_initializer = self.weight_init
+        #     )(x)
+        #     x = Activation('tanh')(x)
+        # else:
+        #     for i in range(self.n_layers_generator):
+        #         x = Conv2DTranspose(
+        #             filters = self.generator_conv_filters[i]
+        #             , kernel_size = self.generator_conv_kernel_size[i]
+        #             , padding = 'same'
+        #             , strides = self.generator_conv_strides[i]
+        #             , name = 'generator_conv_' + str(i)
+        #             , kernel_initializer = self.weight_init
+        #             )(x)
+        #
+        #         if i < self.n_layers_generator - 1:
+        #             if self.generator_batch_norm_momentum:
+        #                 x = BatchNormalization(momentum = self.generator_batch_norm_momentum)(x)
+        #
+        #             x = self.get_activation(self.generator_activation)(x)
+        #         else:
+        #             x = Activation('tanh')(x)
+
+
+        # for i in range(self.n_layers_generator):
+        #     if self.generator_upsample[i] == 2:
+        #         x = UpSampling2D()(x)
+        #         x = Conv2D(
+        #             filters = self.generator_conv_filters[i]
+        #             , kernel_size = self.generator_conv_kernel_size[i]
+        #             , padding = 'same'
+        #             , name = 'generator_conv_' + str(i)
+        #             , kernel_initializer = self.weight_init
+        #         )(x)
+        #     else:
+        #
+        #         x = Conv2DTranspose(
+        #             filters = self.generator_conv_filters[i]
+        #             , kernel_size = self.generator_conv_kernel_size[i]
+        #             , padding = 'same'
+        #             , strides = self.generator_conv_strides[i]
+        #             , name = 'generator_conv_' + str(i)
+        #             , kernel_initializer = self.weight_init
+        #             )(x)
+        #
+        #     if i < self.n_layers_generator - 1:
+        #
+        #         if self.generator_batch_norm_momentum:
+        #             x = BatchNormalization(momentum = self.generator_batch_norm_momentum)(x)
+        #
+        #         x = self.get_activation(self.generator_activation)(x)
+        #
+        #
+        #     else:
+        #
+        #         x = Activation('tanh')(x)
+        #
+
+
 
 
         generator_output = x
 
         self.generator = Model(generator_input, generator_output)
 
-       
+
     def get_opti(self, lr):
         if self.optimiser == 'adam':
             opti = Adam(lr=lr, beta_1=0.5)
@@ -193,15 +307,15 @@ class GAN():
 
 
     def _build_adversarial(self):
-        
+
         ### COMPILE DISCRIMINATOR
 
         self.discriminator.compile(
-        optimizer=self.get_opti(self.discriminator_learning_rate)  
+        optimizer=self.get_opti(self.discriminator_learning_rate)
         , loss = 'binary_crossentropy'
         ,  metrics = ['accuracy']
         )
-        
+
         ### COMPILE THE FULL GAN
 
         self.set_trainable(self.discriminator, False)
@@ -218,7 +332,7 @@ class GAN():
 
 
 
-    
+
     def train_discriminator(self, x_train, batch_size, using_generator):
 
         valid = np.ones((batch_size,1))
@@ -231,7 +345,7 @@ class GAN():
         else:
             idx = np.random.randint(0, x_train.shape[0], batch_size)
             true_imgs = x_train[idx]
-        
+
         noise = np.random.normal(0, 1, (batch_size, self.z_dim))
         gen_imgs = self.generator.predict(noise)
 
@@ -270,20 +384,22 @@ class GAN():
 
             self.epoch += 1
 
-    
+
     def sample_images(self, run_folder):
-        r, c = 5, 5
-        noise = np.random.normal(0, 1, (r * c, self.z_dim))
+        #r, c = 5, 5
+        noise = np.random.normal(
+            0, 1, (self.preview_rows * self.preview_cols, self.z_dim))
         gen_imgs = self.generator.predict(noise)
 
         gen_imgs = 0.5 * (gen_imgs + 1)
         gen_imgs = np.clip(gen_imgs, 0, 1)
 
-        fig, axs = plt.subplots(r, c, figsize=(15,15))
+        fig, axs = plt.subplots(
+            self.preview_rows, self.preview_cols, figsize=(15,15))
         cnt = 0
 
-        for i in range(r):
-            for j in range(c):
+        for i in range(self.preview_rows):
+            for j in range(self.preview_cols):
                 axs[i,j].imshow(np.squeeze(gen_imgs[cnt, :,:,:]), cmap = 'gray')
                 axs[i,j].axis('off')
                 cnt += 1
@@ -292,8 +408,6 @@ class GAN():
 
 
 
-
-    
     def plot_model(self, run_folder):
         plot_model(self.model, to_file=os.path.join(run_folder ,'viz/model.png'), show_shapes = True, show_layer_names = True)
         plot_model(self.discriminator, to_file=os.path.join(run_folder ,'viz/discriminator.png'), show_shapes = True, show_layer_names = True)
@@ -324,6 +438,8 @@ class GAN():
                 , self.generator_learning_rate
                 , self.optimiser
                 , self.z_dim
+                , self.preview_rows
+                , self.preview_cols
                 ], f)
 
         self.plot_model(folder)
@@ -335,8 +451,3 @@ class GAN():
 
     def load_weights(self, filepath):
         self.model.load_weights(filepath)
-
-
-        
-
-

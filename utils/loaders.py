@@ -1,5 +1,7 @@
 import pickle
 import os
+from tqdm import tqdm
+import time
 
 from tensorflow.keras.datasets import mnist, cifar100,cifar10
 from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img, save_img, img_to_array
@@ -16,6 +18,8 @@ from glob import glob
 from tensorflow.keras.applications import vgg19
 from tensorflow.keras import backend as K
 from tensorflow.keras.utils import to_categorical
+
+import tensorflow as tf
 
 import pdb
 
@@ -34,7 +38,7 @@ class ImageLabelLoader():
                 , self.image_folder
                 , x_col='image_id'
                 , y_col=label
-                , target_size=self.target_size 
+                , target_size=self.target_size
                 , class_mode='other'
                 , batch_size=batch_size
                 , shuffle=True
@@ -44,7 +48,7 @@ class ImageLabelLoader():
                 att
                 , self.image_folder
                 , x_col='image_id'
-                , target_size=self.target_size 
+                , target_size=self.target_size
                 , class_mode='input'
                 , batch_size=batch_size
                 , shuffle=True
@@ -131,7 +135,7 @@ class DataLoader():
 
 
 def load_model(model_class, folder):
-    
+
     with open(os.path.join(folder, 'params.pkl'), 'rb') as f:
         params = pickle.load(f)
 
@@ -174,7 +178,7 @@ def load_fashion_mnist(input_rows, input_cols, path='./data/fashion/fashion-mnis
     X_train = X_train.reshape(X_train.shape[0], input_rows, input_cols, 1)
     #extract the labels
     y_train = df['label'].values
-    
+
     return X_train, y_train
 
 def load_safari(folder):
@@ -196,24 +200,24 @@ def load_safari(folder):
         x = np.load(txt_path)
         x = (x.astype('float32') - 127.5) / 127.5
         # x = x.astype('float32') / 255.0
-        
+
         x = x.reshape(x.shape[0], 28, 28, 1)
-        
-        y = [i] * len(x)  
+
+        y = [i] * len(x)
         np.random.seed(seed)
         np.random.shuffle(x)
         np.random.seed(seed)
         np.random.shuffle(y)
         x = x[:slice_train]
         y = y[:slice_train]
-        if i != 0: 
+        if i != 0:
             xtotal = np.concatenate((x,xtotal), axis=0)
             ytotal = np.concatenate((y,ytotal), axis=0)
         else:
             xtotal = x
             ytotal = y
         i += 1
-        
+
     return xtotal, ytotal
 
 
@@ -231,7 +235,7 @@ def load_cifar(label, num):
     y_data = np.concatenate([y_train[train_mask], y_test[test_mask]])
 
     x_data = (x_data.astype('float32') - 127.5) / 127.5
- 
+
     return (x_data, y_data)
 
 
@@ -289,16 +293,16 @@ def load_music(data_name, filename, n_bars, n_steps_per_bar):
 
     num_classes = max_note + 1
 
-    
+
     data_binary = np.eye(num_classes)[data_ints]
     data_binary[data_binary==0] = -1
     data_binary = np.delete(data_binary, max_note,-1)
 
     data_binary = data_binary.transpose([0,1,2, 4,3])
-    
-    
 
-    
+
+
+
 
     return data_binary, data_ints, data
 
@@ -313,3 +317,42 @@ def preprocess_image(data_name, file, img_nrows, img_ncols):
     img = vgg19.preprocess_input(img)
     return img
 
+
+
+def load_beauty(data_path, x_dim, y_dim, batch_size, buffer_size, channels):
+    # Image set has about 10,000 images. Can take over an hour
+    # for initial preprocessing.
+    # Because of this time needed, save a Numpy preprocessed file.
+    # Note, that file is large enough to cause problems for some verisons of Pickle, so Numpy binary files are used.
+    training_binary_path = os.path.join(
+        data_path,f'training_data_{x_dim}_{y_dim}.npy')
+
+    print(f"Looking for file: {training_binary_path}")
+
+    if not os.path.isfile(training_binary_path):
+        start = time.time()
+        print("Loading training images...")
+
+        training_data = []
+        beauty_path = os.path.join(data_path,'beauty_images')
+        for filename in tqdm(os.listdir(beauty_path)):
+            path = os.path.join(beauty_path,filename)
+            image = Image.open(path).resize((x_dim,y_dim),Image.ANTIALIAS)
+            training_data.append(np.asarray(image))
+        training_data = np.reshape(training_data,(-1,x_dim,y_dim,channels))
+        training_data = training_data.astype(np.float32)
+        training_data = training_data / 127.5 - 1.
+
+        print("Saving training image binary...")
+        np.save(training_binary_path,training_data)
+        elapsed = time.time()-start
+        print (f'Image preprocess time: {hms_string(elapsed)}')
+    else:
+        print("Loading previous training pickle...")
+        training_data = np.load(training_binary_path)
+
+    # We will use a TensorFlow Dataset object to actually hold the images. This allows the data to be quickly shuffled and divided into the appropriate batch sizes for training
+    print("batch and shuffling the data...")
+    train_dataset = tf.data.Dataset.from_tensor_slices(training_data).shuffle(buffer_size).batch(batch_size)
+
+    return train_dataset
