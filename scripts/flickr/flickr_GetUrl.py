@@ -12,7 +12,7 @@ import sys
 key='f6a182f0dc4be83ec7b4d1557e710f29'
 secret='2535ebafcf2ec5db'
 
-def get_urls(image_tag,MAX_COUNT,mode='any',url_type='url_o',per_page=50):
+def get_urls(image_tag,MAX_COUNT,mode='any',url_type='url_o'):
     flickr = FlickrAPI(key, secret)
     photos = flickr.walk(text=image_tag,
                             tag_mode=mode,
@@ -27,7 +27,7 @@ def get_urls(image_tag,MAX_COUNT,mode='any',url_type='url_o',per_page=50):
             count=count+1
             print("Fetching url for image number {}".format(count))
             try:
-                url=photo.get('url_o')
+                url=photo.get(url_type)
                 urls.append(url)
             except:
                 print("Url for image number {} could not be fetched".format(count))
@@ -43,7 +43,6 @@ def main():
     MAX_COUNT=int(sys.argv[2])
     tagmode=sys.argv[3]
     urltype=sys.argv[4]
-    perpage=sys.argv[5]
-    get_urls(tag,MAX_COUNT,tagmode,urltype,perpage)
+    get_urls(tag,MAX_COUNT,tagmode,urltype)
 if __name__=='__main__':
     main()
