@@ -8,10 +8,11 @@ import pandas as pd
 import sys
 key='f6a182f0dc4be83ec7b4d1557e710f29'
 secret='2535ebafcf2ec5db'
-def get_urls(image_tag,MAX_COUNT):
+
+def get_urls(image_tag,MAX_COUNT,mode='any'):
     flickr = FlickrAPI(key, secret)
     photos = flickr.walk(text=image_tag,
-                            tag_mode='all',
+                            tag_mode=mode,
                             tags=image_tag,
                             extras='url_o',
                             per_page=50,
@@ -37,6 +38,7 @@ def get_urls(image_tag,MAX_COUNT):
 def main():
     tag=sys.argv[1]
     MAX_COUNT=int(sys.argv[2])
-    get_urls(tag,MAX_COUNT)
+    tagmode=sys.argv[3]
+    get_urls(tag,MAX_COUNT,tagmode)
 if __name__=='__main__':
     main()
