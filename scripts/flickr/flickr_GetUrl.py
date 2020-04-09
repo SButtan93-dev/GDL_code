@@ -12,7 +12,7 @@ import sys
 key='f6a182f0dc4be83ec7b4d1557e710f29'
 secret='2535ebafcf2ec5db'
 
-def get_urls(image_tag,MAX_COUNT,mode='any',url_type='url_o'):
+def get_urls(image_tag,MAX_COUNT,mode='any',url_type='url_o',per_page=50):
     flickr = FlickrAPI(key, secret)
     photos = flickr.walk(text=image_tag,
                             tag_mode=mode,
@@ -43,6 +43,7 @@ def main():
     MAX_COUNT=int(sys.argv[2])
     tagmode=sys.argv[3]
     urltype=sys.argv[4]
-    get_urls(tag,MAX_COUNT,tagmode,urltype)
+    perpage=sys.argv[5]
+    get_urls(tag,MAX_COUNT,tagmode,urltype,perpage)
 if __name__=='__main__':
     main()
