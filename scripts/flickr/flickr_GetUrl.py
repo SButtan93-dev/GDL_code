@@ -14,8 +14,7 @@ secret='2535ebafcf2ec5db'
 
 def get_urls(image_tag,MAX_COUNT,mode='any',url_type='url_o'):
     flickr = FlickrAPI(key, secret)
-    photos = flickr.walk(text=image_tag,
-                            tag_mode=mode,
+    photos = flickr.walk(tag_mode=mode,
                             tags=image_tag,
                             extras=url_type,
                             per_page=50,
