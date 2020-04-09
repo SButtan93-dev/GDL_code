@@ -3,18 +3,21 @@
 # https://gist.github.com/Gunnvant/edd0754a79956a699f4f2cf05fa7e42c#file-flickr_geturl-py
 ## run
 ## > python flickr_GetUrl.py tag number_of_images_to_attempt_to_download
+
+#Flickr API extras extras
+# http://librdf.org/flickcurl/api/flickcurl-searching-search-extras.html
 from flickrapi import FlickrAPI
 import pandas as pd
 import sys
 key='f6a182f0dc4be83ec7b4d1557e710f29'
 secret='2535ebafcf2ec5db'
 
-def get_urls(image_tag,MAX_COUNT,mode='any'):
+def get_urls(image_tag,MAX_COUNT,mode='any',url_type='url_o'):
     flickr = FlickrAPI(key, secret)
     photos = flickr.walk(text=image_tag,
                             tag_mode=mode,
                             tags=image_tag,
-                            extras='url_o',
+                            extras=url_type,
                             per_page=50,
                             sort='relevance')
     count=0
@@ -39,6 +42,7 @@ def main():
     tag=sys.argv[1]
     MAX_COUNT=int(sys.argv[2])
     tagmode=sys.argv[3]
-    get_urls(tag,MAX_COUNT,tagmode)
+    urltype=sys.argv[4]
+    get_urls(tag,MAX_COUNT,tagmode,urltype)
 if __name__=='__main__':
     main()
