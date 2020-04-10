@@ -366,6 +366,8 @@ class GAN():
     , print_every_n_batches = 50
     , using_generator = False):
 
+        x_train = x_train.as_numpy_iterator()
+        
         for epoch in range(self.epoch, self.epoch + epochs):
 
             d = self.train_discriminator(x_train, batch_size, using_generator)
