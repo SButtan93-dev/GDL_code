@@ -319,7 +319,7 @@ def preprocess_image(data_name, file, img_nrows, img_ncols):
 
 
 
-def load_beauty(data_path, x_dim, y_dim, batch_size, buffer_size, channels):
+def load_beauty(data_path, x_dim, y_dim, batch_size, channels):
     # Image set has about 10,000 images. Can take over an hour
     # for initial preprocessing.
     # Because of this time needed, save a Numpy preprocessed file.
@@ -348,7 +348,6 @@ def load_beauty(data_path, x_dim, y_dim, batch_size, buffer_size, channels):
                 continue
 
         #training_data = np.reshape(training_data,(-1,x_dim,y_dim,channels))
-        training_data = np.expand_dims(training_data, axis=-1)
         #training_data = training_data.astype(np.float32)
         #training_data = training_data / 127.5 - 1.
 
@@ -364,10 +363,6 @@ def load_beauty(data_path, x_dim, y_dim, batch_size, buffer_size, channels):
     data_gen = ImageDataGenerator(preprocessing_function=lambda x: (x.astype('float32') - 127.5) / 127.5, data_format="channels_last")
 
     train_dataset = data_gen.flow(training_data,batch_size=batch_size,shuffle=True,subset="training")
-
-    # We will use a TensorFlow Dataset object to actually hold the images. This allows the data to be quickly shuffled and divided into the appropriate batch sizes for training
-    # print("batch and shuffling the data...")
-    # train_dataset = tf.data.Dataset.from_tensor_slices(training_data).shuffle(buffer_size).batch(batch_size)
 
     return train_dataset
 
