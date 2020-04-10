@@ -338,7 +338,11 @@ def load_beauty(data_path, x_dim, y_dim, batch_size, buffer_size, channels):
         for filename in tqdm(os.listdir(beauty_path)):
             try:
                 path = os.path.join(beauty_path,filename)
-                image = Image.open(path).resize((x_dim,y_dim),Image.ANTIALIAS)
+                image = Image.open(path)
+                if image.mode != "RGB":
+                    image = image.convert("RGB")
+                image = image.resize((x_dim,y_dim),Image.ANTIALIAS)
+
                 training_data.append(np.asarray(image))
             except IOError:
                 print("Error reading image! Skipping image.")
