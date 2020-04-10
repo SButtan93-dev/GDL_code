@@ -336,9 +336,14 @@ def load_beauty(data_path, x_dim, y_dim, batch_size, buffer_size, channels):
         training_data = []
         beauty_path = os.path.join(data_path,'beauty_images')
         for filename in tqdm(os.listdir(beauty_path)):
-            path = os.path.join(beauty_path,filename)
-            image = Image.open(path).resize((x_dim,y_dim),Image.ANTIALIAS)
-            training_data.append(np.asarray(image))
+            try:
+                path = os.path.join(beauty_path,filename)
+                image = Image.open(path).resize((x_dim,y_dim),Image.ANTIALIAS)
+                training_data.append(np.asarray(image))
+            except IOError:
+                print("Error reading image! Skipping image.")
+                continue
+
         training_data = np.reshape(training_data,(-1,x_dim,y_dim,channels))
         training_data = training_data.astype(np.float32)
         training_data = training_data / 127.5 - 1.
