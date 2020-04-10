@@ -361,7 +361,7 @@ def load_beauty(data_path, x_dim, y_dim, batch_size, buffer_size, channels):
         training_data = np.load(training_binary_path)
 
 
-    data_gen = ImageDataGenerator(preprocessing_function=lambda x: (x.astype('float32') - 127.5) / 127.5), data_format="channels_last"
+    data_gen = ImageDataGenerator(preprocessing_function=lambda x: (x.astype('float32') - 127.5) / 127.5), data_format="channels_last")
 
     train_dataset = data_gen.flow(training_data,batch_size=batch_size,shuffle=True,subset="training")
 
