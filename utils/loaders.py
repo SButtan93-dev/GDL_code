@@ -325,7 +325,7 @@ def load_beauty(data_path, x_dim, y_dim, batch_size, buffer_size, channels):
     # Because of this time needed, save a Numpy preprocessed file.
     # Note, that file is large enough to cause problems for some verisons of Pickle, so Numpy binary files are used.
     training_binary_path = os.path.join(
-        data_path,f'training_data_{x_dim}_{y_dim}.npy')
+        data_path,f'beauty_training_data_{x_dim}_{y_dim}.npy')
 
     print(f"Looking for file: {training_binary_path}")
 
@@ -347,9 +347,10 @@ def load_beauty(data_path, x_dim, y_dim, batch_size, buffer_size, channels):
                 print("Error reading image! Skipping image.")
                 continue
 
-        training_data = np.reshape(training_data,(-1,x_dim,y_dim,channels))
-        training_data = training_data.astype(np.float32)
-        training_data = training_data / 127.5 - 1.
+        #training_data = np.reshape(training_data,(-1,x_dim,y_dim,channels))
+        training_data = np.expand_dims(training_data, axis=-1)
+        #training_data = training_data.astype(np.float32)
+        #training_data = training_data / 127.5 - 1.
 
         print("Saving training image binary...")
         np.save(training_binary_path,training_data)
@@ -359,9 +360,14 @@ def load_beauty(data_path, x_dim, y_dim, batch_size, buffer_size, channels):
         print("Loading previous training pickle...")
         training_data = np.load(training_binary_path)
 
+
+    data_gen = ImageDataGenerator(preprocessing_function=lambda x: (x.astype('float32') - 127.5) / 127.5), data_format="channels_last"
+
+    train_dataset = data_gen.flow(training_data,batch_size=batch_size,shuffle=True,subset="training")
+
     # We will use a TensorFlow Dataset object to actually hold the images. This allows the data to be quickly shuffled and divided into the appropriate batch sizes for training
-    print("batch and shuffling the data...")
-    train_dataset = tf.data.Dataset.from_tensor_slices(training_data).shuffle(buffer_size).batch(batch_size)
+    # print("batch and shuffling the data...")
+    # train_dataset = tf.data.Dataset.from_tensor_slices(training_data).shuffle(buffer_size).batch(batch_size)
 
     return train_dataset
 
