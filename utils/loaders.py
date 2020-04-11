@@ -334,7 +334,7 @@ def load_beauty(data_path, x_dim, y_dim, batch_size, channels):
         print("Loading training images...")
 
         training_data = []
-        img = np.array(Image.fromarray(img).resize(self.img_res))
+        
         beauty_path = os.path.join(data_path,'beauty_images')
         for filename in tqdm(os.listdir(beauty_path)):
             try:
