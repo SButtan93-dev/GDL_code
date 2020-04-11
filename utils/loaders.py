@@ -334,6 +334,7 @@ def load_beauty(data_path, x_dim, y_dim, batch_size, channels):
         print("Loading training images...")
 
         training_data = []
+        img = np.array(Image.fromarray(img).resize(self.img_res))
         beauty_path = os.path.join(data_path,'beauty_images')
         for filename in tqdm(os.listdir(beauty_path)):
             try:
@@ -347,9 +348,9 @@ def load_beauty(data_path, x_dim, y_dim, batch_size, channels):
                 print("Error reading image! Skipping image.")
                 continue
 
-        #training_data = np.reshape(training_data,(-1,x_dim,y_dim,channels))
-        #training_data = training_data.astype(np.float32)
-        #training_data = training_data / 127.5 - 1.
+        training_data = np.reshape(training_data,(-1,x_dim,y_dim,channels))
+        training_data = training_data.astype(np.float32)
+        training_data = training_data / 127.5 - 1.
 
         print("Saving training image binary...")
         np.save(training_binary_path,training_data)
@@ -360,7 +361,7 @@ def load_beauty(data_path, x_dim, y_dim, batch_size, channels):
         training_data = np.load(training_binary_path)
 
 
-    data_gen = ImageDataGenerator(preprocessing_function=lambda x: (x.astype('float32') - 127.5) / 127.5, data_format="channels_last")
+    data_gen = ImageDataGenerator()
 
     train_dataset = data_gen.flow(training_data,batch_size=batch_size,shuffle=True,subset="training")
 
