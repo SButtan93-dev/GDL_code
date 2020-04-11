@@ -334,7 +334,7 @@ def load_beauty(data_path, x_dim, y_dim, batch_size, channels):
         print("Loading training images...")
 
         training_data = []
-        
+
         beauty_path = os.path.join(data_path,'beauty_images')
         for filename in tqdm(os.listdir(beauty_path)):
             try:
@@ -360,12 +360,11 @@ def load_beauty(data_path, x_dim, y_dim, batch_size, channels):
         print("Loading previous training pickle...")
         training_data = np.load(training_binary_path)
 
+    seed = np.random.randint(1, 10e6)
+    np.random.seed(seed)
+    np.random.shuffle(training_data)
 
-    data_gen = ImageDataGenerator()
-
-    train_dataset = data_gen.flow(training_data,batch_size=batch_size,shuffle=True,subset="training")
-
-    return train_dataset
+    return training_data
 
 # Nicely formatted time string
 def hms_string(sec_elapsed):
