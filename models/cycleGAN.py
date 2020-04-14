@@ -13,7 +13,7 @@ from tensorflow.keras.initializers import RandomNormal
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import backend as K
 
-from tensorflow.keras.utils import plot_model
+#from tensorflow.keras.utils import plot_model
 
 import datetime
 import matplotlib.pyplot as plt
@@ -62,7 +62,7 @@ class CycleGAN():
 
         self.buffer_A = deque(maxlen = self.buffer_max_length)
         self.buffer_B = deque(maxlen = self.buffer_max_length)
-        
+
         # Calculate output shape of D (PatchGAN)
         patch = int(self.img_rows / 2**3)
         self.disc_patch = (patch, patch, 1)
@@ -71,13 +71,13 @@ class CycleGAN():
 
         self.compile_models()
 
-        
+
     def compile_models(self):
 
         # Build and compile the discriminators
         self.d_A = self.build_discriminator()
         self.d_B = self.build_discriminator()
-        
+
         self.d_A.compile(loss='mse',
             optimizer=Adam(self.learning_rate, 0.5),
             metrics=['accuracy'])
@@ -131,7 +131,7 @@ class CycleGAN():
 
         self.d_A.trainable = True
         self.d_B.trainable = True
-    
+
 
     def build_generator_unet(self):
 
@@ -139,7 +139,7 @@ class CycleGAN():
             d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
             d = InstanceNormalization(axis = -1, center = False, scale = False)(d)
             d = Activation('relu')(d)
-            
+
             return d
 
         def upsample(layer_input, skip_input, filters, f_size=4, dropout_rate=0):
@@ -157,7 +157,7 @@ class CycleGAN():
         img = Input(shape=self.img_shape)
 
         # Downsampling
-        d1 = downsample(img, self.gen_n_filters) 
+        d1 = downsample(img, self.gen_n_filters)
         d2 = downsample(d1, self.gen_n_filters*2)
         d3 = downsample(d2, self.gen_n_filters*4)
         d4 = downsample(d3, self.gen_n_filters*8)
@@ -197,7 +197,7 @@ class CycleGAN():
             y = Conv2D(filters, kernel_size=(3, 3), strides=1, padding='valid', kernel_initializer = self.weight_init)(y)
             y = InstanceNormalization(axis = -1, center = False, scale = False)(y)
             y = Activation('relu')(y)
-            
+
             y = ReflectionPadding2D(padding =(1,1))(y)
             y = Conv2D(filters, kernel_size=(3, 3), strides=1, padding='valid', kernel_initializer = self.weight_init)(y)
             y = InstanceNormalization(axis = -1, center = False, scale = False)(y)
@@ -208,7 +208,7 @@ class CycleGAN():
             y = Conv2DTranspose(filters, kernel_size=(3, 3), strides=2, padding='same', kernel_initializer = self.weight_init)(layer_input)
             y = InstanceNormalization(axis = -1, center = False, scale = False)(y)
             y = Activation('relu')(y)
-    
+
             return y
 
 
@@ -234,7 +234,7 @@ class CycleGAN():
         y = conv7s1(y, 3, True)
         output = y
 
-   
+
         return Model(img, output)
 
 
@@ -242,12 +242,12 @@ class CycleGAN():
 
         def conv4(layer_input,filters, stride = 2, norm=True):
             y = Conv2D(filters, kernel_size=(4,4), strides=stride, padding='same', kernel_initializer = self.weight_init)(layer_input)
-            
+
             if norm:
                 y = InstanceNormalization(axis = -1, center = False, scale = False)(y)
 
             y = LeakyReLU(0.2)(y)
-           
+
             return y
 
         img = Input(shape=self.img_shape)
@@ -340,11 +340,11 @@ class CycleGAN():
                     self.combined.save_weights(os.path.join(run_folder, 'weights/weights.h5'))
                     self.save_model(run_folder)
 
-                
+
             self.epoch += 1
 
     def sample_images(self, data_loader, batch_i, run_folder, test_A_file, test_B_file):
-        
+
         r, c = 2, 4
 
         for p in range(2):
@@ -386,12 +386,12 @@ class CycleGAN():
             plt.close()
 
 
-    def plot_model(self, run_folder):
-        plot_model(self.combined, to_file=os.path.join(run_folder ,'viz/combined.png'), show_shapes = True, show_layer_names = True)
-        plot_model(self.d_A, to_file=os.path.join(run_folder ,'viz/d_A.png'), show_shapes = True, show_layer_names = True)
-        plot_model(self.d_B, to_file=os.path.join(run_folder ,'viz/d_B.png'), show_shapes = True, show_layer_names = True)
-        plot_model(self.g_BA, to_file=os.path.join(run_folder ,'viz/g_BA.png'), show_shapes = True, show_layer_names = True)
-        plot_model(self.g_AB, to_file=os.path.join(run_folder ,'viz/g_AB.png'), show_shapes = True, show_layer_names = True)
+    # def plot_model(self, run_folder):
+    #     plot_model(self.combined, to_file=os.path.join(run_folder ,'viz/combined.png'), show_shapes = True, show_layer_names = True)
+    #     plot_model(self.d_A, to_file=os.path.join(run_folder ,'viz/d_A.png'), show_shapes = True, show_layer_names = True)
+    #     plot_model(self.d_B, to_file=os.path.join(run_folder ,'viz/d_B.png'), show_shapes = True, show_layer_names = True)
+    #     plot_model(self.g_BA, to_file=os.path.join(run_folder ,'viz/g_BA.png'), show_shapes = True, show_layer_names = True)
+    #     plot_model(self.g_AB, to_file=os.path.join(run_folder ,'viz/g_AB.png'), show_shapes = True, show_layer_names = True)
 
 
     def save(self, folder):
@@ -409,7 +409,7 @@ class CycleGAN():
                 ,  self.disc_n_filters
                 ], f)
 
-        self.plot_model(folder)
+        #self.plot_model(folder)
 
 
     def save_model(self, run_folder):
