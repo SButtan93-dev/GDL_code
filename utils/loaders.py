@@ -423,7 +423,7 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
         # In case this file is large enough to cause problems for some verisons of Pickle,
         # we use Numpy binary files instead.
         test_binary_path = os.path.join(
-            data_path,f'bacteria_training_data_{block_w}_{block_h}.npy')
+            data_path,f'bacteria_test_data_{block_w}_{block_h}.npy')
 
         print(f"Looking for file: {test_binary_path}")
 
