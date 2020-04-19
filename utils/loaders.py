@@ -454,7 +454,7 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
                     continue
 
             print("Saving test image binary...")
-            np.save(test_binary_path, training_data)
+            np.save(test_binary_path, test_data)
             elapsed = time.time()-start
             print (f'Image preprocess time: {hms_string(elapsed)}')
         else:
