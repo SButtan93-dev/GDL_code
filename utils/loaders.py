@@ -319,7 +319,7 @@ def preprocess_image(data_name, file, img_nrows, img_ncols):
 
 
 
-def load_beauty(data_path, x_dim, y_dim, batch_size, channels):
+def load_beauty(data_path, x_dim, y_dim, channels):
     # Image set has about 10,000 images. Can take over an hour
     # for initial preprocessing.
     # Because of this time needed, save a Numpy preprocessed file.
@@ -367,56 +367,105 @@ def load_beauty(data_path, x_dim, y_dim, batch_size, channels):
     return training_data
 
 
-def load_bacteria(data_path, block_w, block_h, batch_size, channels, label_delim='_'):
-    # Depending on size of image dataset, initial preprocessing can take a while.
-    # Because of this time needed, save a Numpy preprocessed file.
-    # In case this file is large enough to cause problems for some verisons of Pickle,
-    # we use Numpy binary files instead.
-    training_binary_path = os.path.join(
-        data_path,f'beauty_training_data_{block_w}_{block_h}.npy')
+def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim='_'):
+    if train:
+        # Depending on size of image dataset, initial preprocessing can take a while.
+        # Because of this time needed, save a Numpy preprocessed file.
+        # In case this file is large enough to cause problems for some verisons of Pickle,
+        # we use Numpy binary files instead.
+        training_binary_path = os.path.join(
+            data_path,f'bacteria_training_data_{block_w}_{block_h}.npy')
 
-    print(f"Looking for file: {training_binary_path}")
+        print(f"Looking for file: {training_binary_path}")
 
-    if not os.path.isfile(training_binary_path):
-        start = time.time()
-        print("Loading training images...")
+        if not os.path.isfile(training_binary_path):
+            start = time.time()
+            print("Loading training images...")
 
-        training_data = []
+            training_data = []
 
-        bacteria_path = os.path.join(data_path,'bacteria_images')
-        for filename in tqdm(os.listdir(bacteria_path)):
-            try:
-                label = label_bacteria_img(filename, label_delim)
-                path = os.path.join(bacteria_path, filename)
-                img = Image.open(path)
-                if img.mode != "RGB":
-                    img = img.convert("RGB")
-                # https://towardsdatascience.com/microbe-classification-using-deep-learning-e84312046334
-                imarray = np.array(img) #make a copy of the image as a numpy array
-                im_h, im_w = imarray.shape[:2]
-                bw, bh = block_w, block_h
-                for row in np.arange(im_h - bh+1, step=bh):
-                    for col in np.range(im_w - bw+1, step=bw):
-                        im = imarray[row:row+bh, col:col+bw, :]
-                        training_data.append([im, label])
-            except IOError:
-                print("Error reading image! Skipping image.")
-                continue
+            bacteria_path = os.path.join(data_path,'train')
+            for filename in tqdm(os.listdir(bacteria_path)):
+                try:
+                    label = label_bacteria_img(filename, label_delim)
+                    path = os.path.join(bacteria_path, filename)
+                    img = Image.open(path)
+                    if img.mode != "RGB":
+                        img = img.convert("RGB")
+                    # https://towardsdatascience.com/microbe-classification-using-deep-learning-e84312046334
+                    imarray = np.array(img) #make a copy of the image as a numpy array
+                    im_h, im_w = imarray.shape[:2]
+                    bw, bh = block_w, block_h
+                    for row in np.arange(im_h - bh+1, step=bh):
+                        for col in np.range(im_w - bw+1, step=bw):
+                            im = imarray[row:row+bh, col:col+bw, :]
+                            training_data.append([im, label])
+                except IOError:
+                    print("Error reading image! Skipping image.")
+                    continue
 
-        print("Saving training image binary...")
-        np.save(training_binary_path, training_data)
-        elapsed = time.time()-start
-        print (f'Image preprocess time: {hms_string(elapsed)}')
+            print("Saving training image binary...")
+            np.save(training_binary_path, training_data)
+            elapsed = time.time()-start
+            print (f'Image preprocess time: {hms_string(elapsed)}')
+        else:
+            print("Loading previous training pickle...")
+            training_data = np.load(training_binary_path)
+
+        seed = np.random.randint(1, 10e6)
+        np.random.seed(seed)
+        np.random.shuffle(training_data)
+
+        return training_data
     else:
-        print("Loading previous training pickle...")
-        training_data = np.load(training_binary_path)
+        # Depending on size of image dataset, initial preprocessing can take a while.
+        # Because of this time needed, save a Numpy preprocessed file.
+        # In case this file is large enough to cause problems for some verisons of Pickle,
+        # we use Numpy binary files instead.
+        test_binary_path = os.path.join(
+            data_path,f'bacteria_training_data_{block_w}_{block_h}.npy')
 
-    seed = np.random.randint(1, 10e6)
-    np.random.seed(seed)
-    np.random.shuffle(training_data)
+        print(f"Looking for file: {test_binary_path}")
 
-    return training_data
+        if not os.path.isfile(test_binary_path):
+            start = time.time()
+            print("Loading test images...")
 
+            test_data = []
+
+            bacteria_path = os.path.join(data_path,'test')
+            for filename in tqdm(os.listdir(bacteria_path)):
+                try:
+                    label = label_bacteria_img(filename, label_delim)
+                    path = os.path.join(bacteria_path, filename)
+                    img = Image.open(path)
+                    if img.mode != "RGB":
+                        img = img.convert("RGB")
+                    # https://towardsdatascience.com/microbe-classification-using-deep-learning-e84312046334
+                    imarray = np.array(img) #make a copy of the image as a numpy array
+                    im_h, im_w = imarray.shape[:2]
+                    bw, bh = block_w, block_h
+                    for row in np.arange(im_h - bh+1, step=bh):
+                        for col in np.range(im_w - bw+1, step=bw):
+                            im = imarray[row:row+bh, col:col+bw, :]
+                            test_data.append([im, label])
+                except IOError:
+                    print("Error reading image! Skipping image.")
+                    continue
+
+            print("Saving test image binary...")
+            np.save(test_binary_path, training_data)
+            elapsed = time.time()-start
+            print (f'Image preprocess time: {hms_string(elapsed)}')
+        else:
+            print("Loading previous testing pickle...")
+            test_data = np.load(test_binary_path)
+
+        seed = np.random.randint(1, 10e6)
+        np.random.seed(seed)
+        np.random.shuffle(test_data)
+
+        return test_data
 
 
 def label_bacteria_img(name, delim):
