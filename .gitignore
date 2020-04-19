@@ -4,6 +4,7 @@ run/compose/*
 run/paint/*
 run/write/*
 run/vae/*
+run/cnn/*
 
 
 
