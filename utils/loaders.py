@@ -397,7 +397,7 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
                     im_h, im_w = imarray.shape[:2]
                     bw, bh = block_w, block_h
                     for row in np.arange(im_h - bh+1, step=bh):
-                        for col in np.range(im_w - bw+1, step=bw):
+                        for col in np.arange(im_w - bw+1, step=bw):
                             im = imarray[row:row+bh, col:col+bw, :]
                             training_data.append([im, label])
                 except IOError:
@@ -446,7 +446,7 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
                     im_h, im_w = imarray.shape[:2]
                     bw, bh = block_w, block_h
                     for row in np.arange(im_h - bh+1, step=bh):
-                        for col in np.range(im_w - bw+1, step=bw):
+                        for col in np.arange(im_w - bw+1, step=bw):
                             im = imarray[row:row+bh, col:col+bw, :]
                             test_data.append([im, label])
                 except IOError:
