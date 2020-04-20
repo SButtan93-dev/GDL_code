@@ -368,7 +368,6 @@ def load_beauty(data_path, x_dim, y_dim, channels):
 
 
 def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim='_'):
-    img_count=0
     if train:
         # Depending on size of image dataset, initial preprocessing can take a while.
         # Because of this time needed, save a Numpy preprocessed file.
@@ -401,8 +400,6 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
                         for col in np.arange(im_w - bw+1, step=bw):
                             im = imarray[row:row+bh, col:col+bw, :]
                             training_data.append([im, label])
-                            img_count += 1
-                            print(f'{img_count} images created...')
                 except IOError:
                     print("Error reading image! Skipping image.")
                     continue
@@ -452,8 +449,6 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
                         for col in np.arange(im_w - bw+1, step=bw):
                             im = imarray[row:row+bh, col:col+bw, :]
                             test_data.append([im, label])
-                            img_count += 1
-                            print(f'{img_count} images created...')
                 except IOError:
                     print("Error reading image! Skipping image.")
                     continue
