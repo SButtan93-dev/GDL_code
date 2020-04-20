@@ -368,6 +368,7 @@ def load_beauty(data_path, x_dim, y_dim, channels):
 
 
 def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim='_'):
+    img_count=0
     if train:
         # Depending on size of image dataset, initial preprocessing can take a while.
         # Because of this time needed, save a Numpy preprocessed file.
@@ -385,7 +386,6 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
             training_data = []
 
             bacteria_path = os.path.join(data_path,'train')
-            img_count=0
             for filename in tqdm(os.listdir(bacteria_path)):
                 try:
                     label = label_bacteria_img(filename, label_delim)
