@@ -358,7 +358,7 @@ def load_beauty(data_path, x_dim, y_dim, channels):
         print (f'Image preprocess time: {hms_string(elapsed)}')
     else:
         print("Loading previous training pickle...")
-        training_data = np.load(training_binary_path)
+        training_data = np.load(training_binary_path, allow_pickle=True)
 
     seed = np.random.randint(1, 10e6)
     np.random.seed(seed)
@@ -410,7 +410,7 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
             print (f'Image preprocess time: {hms_string(elapsed)}')
         else:
             print("Loading previous training pickle...")
-            training_data = np.load(training_binary_path)
+            training_data = np.load(training_binary_path, allow_pickle=True)
 
         seed = np.random.randint(1, 10e6)
         np.random.seed(seed)
@@ -459,7 +459,7 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
             print (f'Image preprocess time: {hms_string(elapsed)}')
         else:
             print("Loading previous testing pickle...")
-            test_data = np.load(test_binary_path)
+            test_data = np.load(test_binary_path, allow_pickle=True)
 
         seed = np.random.randint(1, 10e6)
         np.random.seed(seed)
