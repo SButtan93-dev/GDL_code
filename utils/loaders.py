@@ -390,7 +390,7 @@ def load_labeled_bacteria(data_path, block_w, block_h, channels, labels, train=T
             for filename in tqdm(os.listdir(bacteria_path)):
                 try:
                     #label = label_bacteria_img(filename, label_delim)
-                    word_label = name.split(label_delim)[0]
+                    word_label = filename.split(label_delim)[0]
                     onehot_label = np.array(np.zeros(len(labels_int), dtype=int))
                     onehot_label[labels_int[word_label]] = 1
                     path = os.path.join(bacteria_path, filename)
@@ -442,7 +442,7 @@ def load_labeled_bacteria(data_path, block_w, block_h, channels, labels, train=T
             for filename in tqdm(os.listdir(bacteria_path)):
                 try:
                     #label = label_bacteria_img(filename, label_delim)
-                    word_label = name.split(label_delim)[0]
+                    word_label = filename.split(label_delim)[0]
                     onehot_label = np.array(np.zeros(len(labels_int), dtype=int))
                     onehot_label[labels_int[word_label]] = 1
                     path = os.path.join(bacteria_path, filename)
