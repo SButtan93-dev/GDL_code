@@ -385,6 +385,7 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
             training_data = []
 
             bacteria_path = os.path.join(data_path,'train')
+            img_count=0
             for filename in tqdm(os.listdir(bacteria_path)):
                 try:
                     label = label_bacteria_img(filename, label_delim)
@@ -400,6 +401,8 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
                         for col in np.arange(im_w - bw+1, step=bw):
                             im = imarray[row:row+bh, col:col+bw, :]
                             training_data.append([im, label])
+                            img_count += 1
+                            print(f'{img_count} images created...')
                 except IOError:
                     print("Error reading image! Skipping image.")
                     continue
@@ -449,6 +452,8 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
                         for col in np.arange(im_w - bw+1, step=bw):
                             im = imarray[row:row+bh, col:col+bw, :]
                             test_data.append([im, label])
+                            img_count += 1
+                            print(f'{img_count} images created...')
                 except IOError:
                     print("Error reading image! Skipping image.")
                     continue
