@@ -367,7 +367,9 @@ def load_beauty(data_path, x_dim, y_dim, channels):
     return training_data
 
 
-def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim='_'):
+def load_labeled_bacteria(data_path, block_w, block_h, channels, labels, train=True, label_delim='_'):
+    labels_int = map_labels(labels)
+
     if train:
         # Depending on size of image dataset, initial preprocessing can take a while.
         # Because of this time needed, save a Numpy preprocessed file.
@@ -387,7 +389,10 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
             bacteria_path = os.path.join(data_path,'train')
             for filename in tqdm(os.listdir(bacteria_path)):
                 try:
-                    label = label_bacteria_img(filename, label_delim)
+                    #label = label_bacteria_img(filename, label_delim)
+                    word_label = name.split(label_delim)[0]
+                    onehot_label = np.array(np.zeros(len(labels_int), dtype=int))
+                    onehot_label[labels_int[word_label]] = 1
                     path = os.path.join(bacteria_path, filename)
                     img = Image.open(path)
                     if img.mode != "RGB":
@@ -399,7 +404,7 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
                     for row in np.arange(im_h - bh+1, step=bh):
                         for col in np.arange(im_w - bw+1, step=bw):
                             im = imarray[row:row+bh, col:col+bw, :]
-                            training_data.append([im, label])
+                            training_data.append([im, onehot_label])
                 except IOError:
                     print("Error reading image! Skipping image.")
                     continue
@@ -436,7 +441,10 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
             bacteria_path = os.path.join(data_path,'test')
             for filename in tqdm(os.listdir(bacteria_path)):
                 try:
-                    label = label_bacteria_img(filename, label_delim)
+                    #label = label_bacteria_img(filename, label_delim)
+                    word_label = name.split(label_delim)[0]
+                    onehot_label = np.array(np.zeros(len(labels_int), dtype=int))
+                    onehot_label[labels_int[word_label]] = 1
                     path = os.path.join(bacteria_path, filename)
                     img = Image.open(path)
                     if img.mode != "RGB":
@@ -448,7 +456,7 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
                     for row in np.arange(im_h - bh+1, step=bh):
                         for col in np.arange(im_w - bw+1, step=bw):
                             im = imarray[row:row+bh, col:col+bw, :]
-                            test_data.append([im, label])
+                            test_data.append([im, onehot_label])
                 except IOError:
                     print("Error reading image! Skipping image.")
                     continue
@@ -468,10 +476,18 @@ def load_bacteria(data_path, block_w, block_h, channels, train=True, label_delim
         return test_data
 
 
-def label_bacteria_img(name, delim):
-    word_label = name.split(delim)[0]
-    if word_label == 'Escherichia.coli' : return np.array([1, 0])
-    elif word_label == 'Lactobacillus.crispatus' : return np.array([0, 1])
+# def label_bacteria_img(name, delim):
+#     word_label = name.split(delim)[0]
+#     if word_label == 'Escherichia.coli' : return np.array([1, 0])
+#     elif word_label == 'Lactobacillus.crispatus' : return np.array([0, 1])
+
+
+def map_labels(labels):
+    # map each label to an integer
+    mapping = {}
+    for x in range(len(labels)):
+        mapping[labels[x]] = x
+    return mapping
 
 
 
