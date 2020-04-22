@@ -390,8 +390,13 @@ def load_bacteria(data_path, x_dim, y_dim, channels):
                 img = Image.open(path)
                 if img.mode != "RGB":
                     img = img.convert("RGB")
-                img = img.resize((x_dim,y_dim),Image.ANTIALIAS)
-                training_data.append(np.asarray(img))
+                # https://towardsdatascience.com/microbe-classification-using-deep-learning-e84312046334
+                imarray = np.array(img) #make a copy of the image as a numpy array
+                im_h, im_w = imarray.shape[:2]
+                for row in np.arange(im_h - y_dim+1, step=y_dim):
+                    for col in np.arange(im_w - x_dim+1, step=x_dim):
+                        im = imarray[row:row+y_dim, col:col+x_dim, :]
+                        training_data.append(im)
             except IOError:
                 print("Error reading image! Skipping image.")
                 continue
