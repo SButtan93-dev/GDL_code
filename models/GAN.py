@@ -142,10 +142,10 @@ class GAN():
 
         x = Dense(np.prod(self.generator_initial_dense_layer_size), kernel_initializer = self.weight_init, activation=self.generator_activation)(x)
 
-        # if self.generator_batch_norm_momentum:
-        #     x = BatchNormalization(momentum = self.generator_batch_norm_momentum)(x)
+        if self.generator_batch_norm_momentum:
+            x = BatchNormalization(momentum = self.generator_batch_norm_momentum)(x)
 
-        #x = self.get_activation(self.generator_activation)(x)
+        x = self.get_activation(self.generator_activation)(x)
 
         x = Reshape(self.generator_initial_dense_layer_size)(x)
 
