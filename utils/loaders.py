@@ -384,7 +384,7 @@ def load_bacteria(data_path, x_dim, y_dim, channels):
         training_data = []
 
         bacteria_path = os.path.join(data_path,'bacteria_images')
-        for filename in tqdm(os.listdir(beauty_path)):
+        for filename in tqdm(os.listdir(bacteria_path)):
             try:
                 path = os.path.join(bacteria_path,filename)
                 img = Image.open(path)
