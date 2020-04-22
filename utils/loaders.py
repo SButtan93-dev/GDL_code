@@ -367,6 +367,54 @@ def load_beauty(data_path, x_dim, y_dim, channels):
     return training_data
 
 
+def load_bacteria(data_path, x_dim, y_dim, channels):
+    # Image set has about 10,000 images. Can take over an hour
+    # for initial preprocessing.
+    # Because of this time needed, save a Numpy preprocessed file.
+    # Note, that file is large enough to cause problems for some verisons of Pickle, so Numpy binary files are used.
+    training_binary_path = os.path.join(
+        data_path,f'bacteria_training_data_{x_dim}_{y_dim}.npy')
+
+    print(f"Looking for file: {training_binary_path}")
+
+    if not os.path.isfile(training_binary_path):
+        start = time.time()
+        print("Loading training images...")
+
+        training_data = []
+
+        bacteria_path = os.path.join(data_path,'bacteria_images')
+        for filename in tqdm(os.listdir(beauty_path)):
+            try:
+                path = os.path.join(bacteria_path,filename)
+                img = Image.open(path)
+                if img.mode != "RGB":
+                    img = img.convert("RGB")
+                img = img.resize((x_dim,y_dim),Image.ANTIALIAS)
+                training_data.append(np.asarray(img))
+            except IOError:
+                print("Error reading image! Skipping image.")
+                continue
+
+        training_data = np.reshape(training_data,(-1,x_dim,y_dim,channels))
+        training_data = training_data.astype(np.float32)
+        training_data = training_data / 127.5 - 1.
+
+        print("Saving training image binary...")
+        np.save(training_binary_path,training_data)
+        elapsed = time.time()-start
+        print (f'Image preprocess time: {hms_string(elapsed)}')
+    else:
+        print("Loading previous training pickle...")
+        training_data = np.load(training_binary_path, allow_pickle=True)
+
+    seed = np.random.randint(1, 10e6)
+    np.random.seed(seed)
+    np.random.shuffle(training_data)
+
+    return training_data
+
+
 def load_labeled_bacteria(data_path, block_w, block_h, channels, labels, train=True, label_delim='_'):
     labels_int = map_labels(labels)
 
