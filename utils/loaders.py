@@ -367,7 +367,7 @@ def load_beauty(data_path, x_dim, y_dim, channels):
     return training_data
 
 
-def load_bacteria(data_path, x_dim, y_dim, channels):
+def load_bacteria(data_path, x_dim, y_dim, blow_w, block_h, channels):
     # Image set has about 10,000 images. Can take over an hour
     # for initial preprocessing.
     # Because of this time needed, save a Numpy preprocessed file.
@@ -387,16 +387,241 @@ def load_bacteria(data_path, x_dim, y_dim, channels):
         for filename in tqdm(os.listdir(bacteria_path)):
             try:
                 path = os.path.join(bacteria_path,filename)
+                # open image file
                 img = Image.open(path)
                 if img.mode != "RGB":
                     img = img.convert("RGB")
+
+                #make a copies of the image as numpy arrays and augement them
+                imarray = np.array(img)
+                #FlipH image
+                imarray_flip_h = np.fliplr(np.array(img))
+                #FlipV image
+                imarray_flip_v = np.flipud(np.array(img))
+                #Rotate180 image
+                imarray_rot_180 = np.rot90(np.array(img), 2)
+                #Rotate 90CW (270) image
+                imarray_rot_90cw = np.rot90(np.array(img), 3)
+                #Rotate 90CCW image
+                imarray_rot_90ccw = np.rot90(np.array(img))
+
+                # create block_w x block_h blocks
                 # https://towardsdatascience.com/microbe-classification-using-deep-learning-e84312046334
-                imarray = np.array(img) #make a copy of the image as a numpy array
-                im_h, im_w = imarray.shape[:2]
-                for row in np.arange(im_h - y_dim+1, step=y_dim):
-                    for col in np.arange(im_w - x_dim+1, step=x_dim):
-                        im = imarray[row:row+y_dim, col:col+x_dim, :]
-                        training_data.append(im)
+                im_h, im_w = imarray.shape[:2] # orig image array
+                for row in np.arange(im_h - block_h+1, step=block_h):
+                    for col in np.arange(im_w - block_w+1, step=block_w):
+                        im = imarray[row:row+block_h, col:col+block_w, :]
+                        #resize to x_im, y_dim
+                        im = Image.fromarray(im)
+                        im = im.resize((x_dim,y_dim),Image.ANTIALIAS)
+                        # append to training_data array
+                        training_data.append(np.asarray(im))
+
+                        #FlipH image
+                        flip_h_img = np.fliplr(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(flip_h_img))
+
+                        #FlipV image
+                        flip_v_img = np.flipud(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(flip_v_img))
+
+                        #Rotate180 image
+                        rot_180_img = np.rot90(np.array(im), 2)
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_180_img))
+
+                        #Rotate 90CW (270) image
+                        rot_90cw_img = np.rot90(np.array(im), 3)
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_90cw_img))
+
+                        #Rotate 90CCW image
+                        rot_90ccw_img = np.rot90(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_90ccw_img))
+
+
+                im_h, im_w = imarray_flip_h.shape[:2] # flipH
+                for row in np.arange(im_h - block_h+1, step=block_h):
+                    for col in np.arange(im_w - block_w+1, step=block_w):
+                        im = imarray[row:row+block_h, col:col+block_w, :]
+                        #resize to x_im, y_dim
+                        im = Image.fromarray(im)
+                        im = im.resize((x_dim,y_dim),Image.ANTIALIAS)
+                        # append to training_data array
+                        training_data.append(np.asarray(im))
+
+                        #FlipH image
+                        flip_h_img = np.fliplr(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(flip_h_img))
+
+                        #FlipV image
+                        flip_v_img = np.flipud(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(flip_v_img))
+
+                        #Rotate180 image
+                        rot_180_img = np.rot90(np.array(im), 2)
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_180_img))
+
+                        #Rotate 90CW (270) image
+                        rot_90cw_img = np.rot90(np.array(im), 3)
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_90cw_img))
+
+                        #Rotate 90CCW image
+                        rot_90ccw_img = np.rot90(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_90ccw_img))
+
+
+                im_h, im_w = imarray_flip_v.shape[:2] # flipV
+                for row in np.arange(im_h - block_h+1, step=block_h):
+                    for col in np.arange(im_w - block_w+1, step=block_w):
+                        im = imarray[row:row+block_h, col:col+block_w, :]
+                        #resize to x_im, y_dim
+                        im = Image.fromarray(im)
+                        im = im.resize((x_dim,y_dim),Image.ANTIALIAS)
+                        # append to training_data array
+                        training_data.append(np.asarray(im))
+
+                        #FlipH image
+                        flip_h_img = np.fliplr(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(flip_h_img))
+
+                        #FlipV image
+                        flip_v_img = np.flipud(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(flip_v_img))
+
+                        #Rotate180 image
+                        rot_180_img = np.rot90(np.array(im), 2)
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_180_img))
+
+                        #Rotate 90CW (270) image
+                        rot_90cw_img = np.rot90(np.array(im), 3)
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_90cw_img))
+
+                        #Rotate 90CCW image
+                        rot_90ccw_img = np.rot90(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_90ccw_img))
+
+
+                im_h, im_w = imarray_rot_180.shape[:2] # rotate180
+                for row in np.arange(im_h - block_h+1, step=block_h):
+                    for col in np.arange(im_w - block_w+1, step=block_w):
+                        im = imarray[row:row+block_h, col:col+block_w, :]
+                        #resize to x_im, y_dim
+                        im = Image.fromarray(im)
+                        im = im.resize((x_dim,y_dim),Image.ANTIALIAS)
+                        # append to training_data array
+                        training_data.append(np.asarray(im))
+
+                        #FlipH image
+                        flip_h_img = np.fliplr(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(flip_h_img))
+
+                        #FlipV image
+                        flip_v_img = np.flipud(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(flip_v_img))
+
+                        #Rotate180 image
+                        rot_180_img = np.rot90(np.array(im), 2)
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_180_img))
+
+                        #Rotate 90CW (270) image
+                        rot_90cw_img = np.rot90(np.array(im), 3)
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_90cw_img))
+
+                        #Rotate 90CCW image
+                        rot_90ccw_img = np.rot90(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_90ccw_img))
+
+
+                im_h, im_w = imarray_rot_90cw.shape[:2] # rotate90cw
+                for row in np.arange(im_h - block_h+1, step=block_h):
+                    for col in np.arange(im_w - block_w+1, step=block_w):
+                        im = imarray[row:row+block_h, col:col+block_w, :]
+                        #resize to x_im, y_dim
+                        im = Image.fromarray(im)
+                        im = im.resize((x_dim,y_dim),Image.ANTIALIAS)
+                        # append to training_data array
+                        training_data.append(np.asarray(im))
+
+                        #FlipH image
+                        flip_h_img = np.fliplr(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(flip_h_img))
+
+                        #FlipV image
+                        flip_v_img = np.flipud(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(flip_v_img))
+
+                        #Rotate180 image
+                        rot_180_img = np.rot90(np.array(im), 2)
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_180_img))
+
+                        #Rotate 90CW (270) image
+                        rot_90cw_img = np.rot90(np.array(im), 3)
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_90cw_img))
+
+                        #Rotate 90CCW image
+                        rot_90ccw_img = np.rot90(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_90ccw_img))
+
+
+                im_h, im_w = imarray_rot_90ccw.shape[:2] # rotate90ccw
+                for row in np.arange(im_h - block_h+1, step=block_h):
+                    for col in np.arange(im_w - block_w+1, step=block_w):
+                        im = imarray[row:row+block_h, col:col+block_w, :]
+                        #resize to x_im, y_dim
+                        im = Image.fromarray(im)
+                        im = im.resize((x_dim,y_dim),Image.ANTIALIAS)
+                        # append to training_data array
+                        training_data.append(np.asarray(im))
+
+                        #FlipH image
+                        flip_h_img = np.fliplr(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(flip_h_img))
+
+                        #FlipV image
+                        flip_v_img = np.flipud(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(flip_v_img))
+
+                        #Rotate180 image
+                        rot_180_img = np.rot90(np.array(im), 2)
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_180_img))
+
+                        #Rotate 90CW (270) image
+                        rot_90cw_img = np.rot90(np.array(im), 3)
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_90cw_img))
+
+                        #Rotate 90CCW image
+                        rot_90ccw_img = np.rot90(np.array(im))
+                        # append to training_data array
+                        training_data.append(np.asarray(rot_90ccw_img))
+
             except IOError:
                 print("Error reading image! Skipping image.")
                 continue

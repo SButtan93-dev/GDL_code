@@ -33,7 +33,7 @@ class GAN():
         , generator_activation
         , generator_dropout_rate
         , generator_learning_rate
-        , virtual_batch_size
+        , virtual_batch_size=None
         , optimiser
         , z_dim
         , preview_rows=5
@@ -437,6 +437,7 @@ class GAN():
                 , self.generator_activation
                 , self.generator_dropout_rate
                 , self.generator_learning_rate
+                , self.virtual_batch_size
                 , self.optimiser
                 , self.z_dim
                 , self.preview_rows
