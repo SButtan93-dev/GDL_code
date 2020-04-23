@@ -168,7 +168,7 @@ class GAN():
                     , kernel_initializer = self.weight_init
                 )(x)
             else:
-                x = Conv2D(
+                x = Conv2DTranspose(
                     filters = self.generator_conv_filters[i]
                     , kernel_size = self.generator_conv_kernel_size[i]
                     , padding = 'same'
