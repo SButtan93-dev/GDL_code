@@ -33,6 +33,7 @@ class GAN():
         , generator_activation
         , generator_dropout_rate
         , generator_learning_rate
+        , virtual_batch_size
         , optimiser
         , z_dim
         , preview_rows=5
@@ -60,6 +61,7 @@ class GAN():
         self.generator_dropout_rate = generator_dropout_rate
         self.generator_learning_rate = generator_learning_rate
 
+        self.virtual_batch_size = virtual_batch_size
         self.optimiser = optimiser
         self.z_dim = z_dim
 
@@ -120,7 +122,7 @@ class GAN():
                     )(x)
 
                 if self.discriminator_batch_norm_momentum and i > 0:
-                    x = BatchNormalization(momentum = self.discriminator_batch_norm_momentum)(x)
+                    x = BatchNormalization(momentum = self.discriminator_batch_norm_momentum, virtual_batch_size = self.virtual_batch_size)(x)
 
                 x = self.get_activation(self.discriminator_activation)(x)
 
@@ -140,10 +142,10 @@ class GAN():
 
         x = generator_input
 
-        x = Dense(np.prod(self.generator_initial_dense_layer_size), kernel_initializer = self.weight_init, activation=self.generator_activation)(x)
+        x = Dense(np.prod(self.generator_initial_dense_layer_size), kernel_initializer = self.weight_init)(x)
 
         if self.generator_batch_norm_momentum:
-            x = BatchNormalization(momentum = self.generator_batch_norm_momentum)(x)
+            x = BatchNormalization(momentum = self.generator_batch_norm_momentum, virtual_batch_size = self.virtual_batch_size)(x)
 
         x = self.get_activation(self.generator_activation)(x)
 
@@ -166,7 +168,7 @@ class GAN():
                     , kernel_initializer = self.weight_init
                 )(x)
             else:
-                x = Conv2DTranspose(
+                x = Conv2D(
                     filters = self.generator_conv_filters[i]
                     , kernel_size = self.generator_conv_kernel_size[i]
                     , padding = 'same'
@@ -177,7 +179,7 @@ class GAN():
 
             if i < self.n_layers_generator - 1:
                 if self.generator_batch_norm_momentum:
-                    x = BatchNormalization(momentum = self.generator_batch_norm_momentum)(x)
+                    x = BatchNormalization(momentum = self.generator_batch_norm_momentum, virtual_batch_size = self.virtual_batch_size)(x)
 
                 x = self.get_activation(self.generator_activation)(x)
             else:

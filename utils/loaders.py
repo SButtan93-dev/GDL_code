@@ -408,10 +408,11 @@ def load_bacteria(data_path, x_dim, y_dim, channels):
         print("Saving training image binary...")
         np.save(training_binary_path,training_data)
         elapsed = time.time()-start
-        print (f'Image preprocess time: {hms_string(elapsed)}')
+        print (f'Done. Image preprocess time: {hms_string(elapsed)}')
     else:
         print("Loading previous training pickle...")
         training_data = np.load(training_binary_path, allow_pickle=True)
+        print("Done.")
 
     seed = np.random.randint(1, 10e6)
     np.random.seed(seed)
@@ -465,10 +466,11 @@ def load_labeled_bacteria(data_path, block_w, block_h, channels, labels, train=T
             print("Saving training image binary...")
             np.save(training_binary_path, training_data)
             elapsed = time.time()-start
-            print (f'Image preprocess time: {hms_string(elapsed)}')
+            print (f'Done. Image preprocess time: {hms_string(elapsed)}')
         else:
             print("Loading previous training pickle...")
             training_data = np.load(training_binary_path, allow_pickle=True)
+            print("Done.")
 
         seed = np.random.randint(1, 10e6)
         np.random.seed(seed)
@@ -517,10 +519,11 @@ def load_labeled_bacteria(data_path, block_w, block_h, channels, labels, train=T
             print("Saving test image binary...")
             np.save(test_binary_path, test_data)
             elapsed = time.time()-start
-            print (f'Image preprocess time: {hms_string(elapsed)}')
+            print (f'Done. Image preprocess time: {hms_string(elapsed)}')
         else:
             print("Loading previous testing pickle...")
             test_data = np.load(test_binary_path, allow_pickle=True)
+            print("Done.")
 
         seed = np.random.randint(1, 10e6)
         np.random.seed(seed)
