@@ -367,7 +367,7 @@ def load_beauty(data_path, x_dim, y_dim, channels):
     return training_data
 
 
-def load_bacteria(data_path, x_dim, y_dim, blow_w, block_h, channels):
+def load_bacteria(data_path, x_dim, y_dim, block_w, block_h, channels):
     # Image set has about 10,000 images. Can take over an hour
     # for initial preprocessing.
     # Because of this time needed, save a Numpy preprocessed file.
