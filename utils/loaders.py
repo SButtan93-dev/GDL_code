@@ -376,6 +376,7 @@ def load_bacteria(data_path, x_dim, y_dim, block_w, block_h, channels):
         data_path,f'bacteria_training_data_{x_dim}_{y_dim}.npy')
 
     print(f"Looking for file: {training_binary_path}")
+    img_count = 0;
 
     if not os.path.isfile(training_binary_path):
         start = time.time()
@@ -416,31 +417,37 @@ def load_bacteria(data_path, x_dim, y_dim, block_w, block_h, channels):
                         im = im.resize((x_dim,y_dim),Image.ANTIALIAS)
                         # append to training_data array
                         training_data.append(np.asarray(im))
+                        img_count += 1
 
                         #FlipH image
                         flip_h_img = np.fliplr(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(flip_h_img))
+                        img_count += 1
 
                         #FlipV image
                         flip_v_img = np.flipud(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(flip_v_img))
+                        img_count += 1
 
                         #Rotate180 image
                         rot_180_img = np.rot90(np.array(im), 2)
                         # append to training_data array
                         training_data.append(np.asarray(rot_180_img))
+                        img_count += 1
 
                         #Rotate 90CW (270) image
                         rot_90cw_img = np.rot90(np.array(im), 3)
                         # append to training_data array
                         training_data.append(np.asarray(rot_90cw_img))
+                        img_count += 1
 
                         #Rotate 90CCW image
                         rot_90ccw_img = np.rot90(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(rot_90ccw_img))
+                        img_count += 1
 
 
                 im_h, im_w = imarray_flip_h.shape[:2] # flipH
@@ -452,31 +459,37 @@ def load_bacteria(data_path, x_dim, y_dim, block_w, block_h, channels):
                         im = im.resize((x_dim,y_dim),Image.ANTIALIAS)
                         # append to training_data array
                         training_data.append(np.asarray(im))
+                        img_count += 1
 
                         #FlipH image
                         flip_h_img = np.fliplr(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(flip_h_img))
+                        img_count += 1
 
                         #FlipV image
                         flip_v_img = np.flipud(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(flip_v_img))
+                        img_count += 1
 
                         #Rotate180 image
                         rot_180_img = np.rot90(np.array(im), 2)
                         # append to training_data array
                         training_data.append(np.asarray(rot_180_img))
+                        img_count += 1
 
                         #Rotate 90CW (270) image
                         rot_90cw_img = np.rot90(np.array(im), 3)
                         # append to training_data array
                         training_data.append(np.asarray(rot_90cw_img))
+                        img_count += 1
 
                         #Rotate 90CCW image
                         rot_90ccw_img = np.rot90(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(rot_90ccw_img))
+                        img_count += 1
 
 
                 im_h, im_w = imarray_flip_v.shape[:2] # flipV
@@ -488,31 +501,37 @@ def load_bacteria(data_path, x_dim, y_dim, block_w, block_h, channels):
                         im = im.resize((x_dim,y_dim),Image.ANTIALIAS)
                         # append to training_data array
                         training_data.append(np.asarray(im))
+                        img_count += 1
 
                         #FlipH image
                         flip_h_img = np.fliplr(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(flip_h_img))
+                        img_count += 1
 
                         #FlipV image
                         flip_v_img = np.flipud(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(flip_v_img))
+                        img_count += 1
 
                         #Rotate180 image
                         rot_180_img = np.rot90(np.array(im), 2)
                         # append to training_data array
                         training_data.append(np.asarray(rot_180_img))
+                        img_count += 1
 
                         #Rotate 90CW (270) image
                         rot_90cw_img = np.rot90(np.array(im), 3)
                         # append to training_data array
                         training_data.append(np.asarray(rot_90cw_img))
+                        img_count += 1
 
                         #Rotate 90CCW image
                         rot_90ccw_img = np.rot90(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(rot_90ccw_img))
+                        img_count += 1
 
 
                 im_h, im_w = imarray_rot_180.shape[:2] # rotate180
@@ -524,31 +543,37 @@ def load_bacteria(data_path, x_dim, y_dim, block_w, block_h, channels):
                         im = im.resize((x_dim,y_dim),Image.ANTIALIAS)
                         # append to training_data array
                         training_data.append(np.asarray(im))
+                        img_count += 1
 
                         #FlipH image
                         flip_h_img = np.fliplr(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(flip_h_img))
+                        img_count += 1
 
                         #FlipV image
                         flip_v_img = np.flipud(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(flip_v_img))
+                        img_count += 1
 
                         #Rotate180 image
                         rot_180_img = np.rot90(np.array(im), 2)
                         # append to training_data array
                         training_data.append(np.asarray(rot_180_img))
+                        img_count += 1
 
                         #Rotate 90CW (270) image
                         rot_90cw_img = np.rot90(np.array(im), 3)
                         # append to training_data array
                         training_data.append(np.asarray(rot_90cw_img))
+                        img_count += 1
 
                         #Rotate 90CCW image
                         rot_90ccw_img = np.rot90(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(rot_90ccw_img))
+                        img_count += 1
 
 
                 im_h, im_w = imarray_rot_90cw.shape[:2] # rotate90cw
@@ -560,31 +585,37 @@ def load_bacteria(data_path, x_dim, y_dim, block_w, block_h, channels):
                         im = im.resize((x_dim,y_dim),Image.ANTIALIAS)
                         # append to training_data array
                         training_data.append(np.asarray(im))
+                        img_count += 1
 
                         #FlipH image
                         flip_h_img = np.fliplr(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(flip_h_img))
+                        img_count += 1
 
                         #FlipV image
                         flip_v_img = np.flipud(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(flip_v_img))
+                        img_count += 1
 
                         #Rotate180 image
                         rot_180_img = np.rot90(np.array(im), 2)
                         # append to training_data array
                         training_data.append(np.asarray(rot_180_img))
+                        img_count += 1
 
                         #Rotate 90CW (270) image
                         rot_90cw_img = np.rot90(np.array(im), 3)
                         # append to training_data array
                         training_data.append(np.asarray(rot_90cw_img))
+                        img_count += 1
 
                         #Rotate 90CCW image
                         rot_90ccw_img = np.rot90(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(rot_90ccw_img))
+                        img_count += 1
 
 
                 im_h, im_w = imarray_rot_90ccw.shape[:2] # rotate90ccw
@@ -596,31 +627,37 @@ def load_bacteria(data_path, x_dim, y_dim, block_w, block_h, channels):
                         im = im.resize((x_dim,y_dim),Image.ANTIALIAS)
                         # append to training_data array
                         training_data.append(np.asarray(im))
+                        img_count += 1
 
                         #FlipH image
                         flip_h_img = np.fliplr(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(flip_h_img))
+                        img_count += 1
 
                         #FlipV image
                         flip_v_img = np.flipud(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(flip_v_img))
+                        img_count += 1
 
                         #Rotate180 image
                         rot_180_img = np.rot90(np.array(im), 2)
                         # append to training_data array
                         training_data.append(np.asarray(rot_180_img))
+                        img_count += 1
 
                         #Rotate 90CW (270) image
                         rot_90cw_img = np.rot90(np.array(im), 3)
                         # append to training_data array
                         training_data.append(np.asarray(rot_90cw_img))
+                        img_count += 1
 
                         #Rotate 90CCW image
                         rot_90ccw_img = np.rot90(np.array(im))
                         # append to training_data array
                         training_data.append(np.asarray(rot_90ccw_img))
+                        img_count += 1
 
             except IOError:
                 print("Error reading image! Skipping image.")
@@ -630,6 +667,8 @@ def load_bacteria(data_path, x_dim, y_dim, block_w, block_h, channels):
         training_data = training_data.astype(np.float32)
         training_data = training_data / 127.5 - 1.
 
+
+        print(f'{img_count} images loaded.')
         print("Saving training image binary...")
         np.save(training_binary_path,training_data)
         elapsed = time.time()-start
@@ -637,7 +676,7 @@ def load_bacteria(data_path, x_dim, y_dim, block_w, block_h, channels):
     else:
         print("Loading previous training pickle...")
         training_data = np.load(training_binary_path, allow_pickle=True)
-        print("Done.")
+        print(f'Done. {len(training_data)} images loaded')
 
     seed = np.random.randint(1, 10e6)
     np.random.seed(seed)
