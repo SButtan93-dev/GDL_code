@@ -343,11 +343,10 @@ class GAN():
         # from Goodfellow, I. (2016). NIPS 2016 Tutorial: Generative Adversarial Networks.
         # https://arxiv.org/abs/1701.00160
         # I'm doing this for the fake examples too.
-        # apparently flipping the labels (Fake=True, Real=False) also helps
-        fake = np.random.uniform(low=0.9, high=1.0, size=batch_size)
-        valid = np.random.uniform(low=0.0, high=0.1, size=batch_size)
-        #fake = np.ones((batch_size,1))
-        #valid = np.zeros((batch_size,1))
+        valid = np.random.uniform(low=0.9, high=1.0, size=batch_size)
+        fake = np.random.uniform(low=0.0, high=0.1, size=batch_size)
+        #valid = np.ones((batch_size,1))
+        #fake = np.zeros((batch_size,1))
 
         if using_generator:
             true_imgs = next(x_train)[0]
