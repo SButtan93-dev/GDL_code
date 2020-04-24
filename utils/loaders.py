@@ -329,6 +329,8 @@ def load_beauty(data_path, x_dim, y_dim, channels):
 
     print(f"Looking for file: {training_binary_path}")
 
+    img_count = 0;
+
     if not os.path.isfile(training_binary_path):
         start = time.time()
         print("Loading training images...")
@@ -344,6 +346,7 @@ def load_beauty(data_path, x_dim, y_dim, channels):
                     img = img.convert("RGB")
                 img = img.resize((x_dim,y_dim),Image.ANTIALIAS)
                 training_data.append(np.asarray(img))
+                img_count += 1
             except IOError:
                 print("Error reading image! Skipping image.")
                 continue
@@ -352,13 +355,15 @@ def load_beauty(data_path, x_dim, y_dim, channels):
         training_data = training_data.astype(np.float32)
         training_data = training_data / 127.5 - 1.
 
+        print(f'{img_count} images loaded.')
         print("Saving training image binary...")
         np.save(training_binary_path,training_data)
         elapsed = time.time()-start
-        print (f'Image preprocess time: {hms_string(elapsed)}')
+        print (f'Done. Image preprocess time: {hms_string(elapsed)}')
     else:
         print("Loading previous training pickle...")
         training_data = np.load(training_binary_path, allow_pickle=True)
+        print(f'Done. {len(training_data)} images loaded')
 
     seed = np.random.randint(1, 10e6)
     np.random.seed(seed)
@@ -796,6 +801,115 @@ def load_labeled_bacteria(data_path, block_w, block_h, channels, labels, train=T
         return test_data
 
 
+def load_flowers(data_path, x_dim, y_dim, crop_w, crop_h, channels):
+    # Image set has about 10,000 images. Can take over an hour
+    # for initial preprocessing.
+    # Because of this time needed, save a Numpy preprocessed file.
+    # Note, that file is large enough to cause problems for some verisons of Pickle, so Numpy binary files are used.
+    training_binary_path = os.path.join(
+        data_path,f'flowers_training_data_{x_dim}_{y_dim}.npy')
+
+    print(f"Looking for file: {training_binary_path}")
+    img_count = 0;
+
+    if not os.path.isfile(training_binary_path):
+        start = time.time()
+        print("Loading training images...")
+
+        training_data = []
+
+        flowers_path = os.path.join(data_path,'images')
+        for filename in tqdm(os.listdir(flowers_path)):
+            try:
+                path = os.path.join(flowers_path,filename)
+                # open image file
+                img = Image.open(path)
+                if img.mode != "RGB":
+                    img = img.convert("RGB")
+
+                rot_img = img_rotate_and_crop(img, crop_w, crop_h, 5) # rotate 5 degrees (ccw)
+                img = img_rotate_and_crop(img, crop_w, crop_h)
+
+                # resize the non-rotated image
+                img = img.resize((x_dim,y_dim),Image.ANTIALIAS)
+
+                #convert images to numpy arrays, augment them
+                #and add them to the training data
+                training_data.append(np.asarray(img))
+                img_count += 1
+                #FlipH image
+                img_flip_h = np.fliplr(np.asarray(img))
+                training_data.append(np.asarray(img_flip_h))
+                img_count += 1
+                #FlipV image
+                img_flip_v = np.flipud(np.asarray(img))
+                training_data.append(np.asarray(img_flip_v))
+                img_count += 1
+                #Rotate180 image
+                img_rot_180 = np.rot90(np.asarray(img), 2)
+                training_data.append(np.asarray(img_rot_180))
+                img_count += 1
+                #Rotate 90CW (270) image
+                img_rot_90cw = np.rot90(np.asarray(img), 3)
+                training_data.append(np.asarray(img_rot_90cw))
+                img_count += 1
+                #Rotate 90CCW image
+                img_rot_90ccw = np.rot90(np.asarray(img))
+                training_data.append(np.asarray(img_rot_90ccw))
+                img_count += 1
+
+                # resize the rotated image
+                rot_img = rot_img.resize((x_dim,y_dim),Image.ANTIALIAS)
+
+                #convert images to numpy arrays, augment them
+                #and add them to the training data
+                training_data.append(np.asarray(rot_img))
+                img_count += 1
+                #FlipH image
+                img_flip_h = np.fliplr(np.asarray(rot_img))
+                training_data.append(np.asarray(img_flip_h))
+                img_count += 1
+                #FlipV image
+                img_flip_v = np.flipud(np.asarray(rot_img))
+                training_data.append(np.asarray(img_flip_v))
+                img_count += 1
+                #Rotate180 image
+                img_rot_180 = np.rot90(np.asarray(rot_img), 2)
+                training_data.append(np.asarray(img_rot_180))
+                img_count += 1
+                #Rotate 90CW (270) image
+                img_rot_90cw = np.rot90(np.asarray(rot_img), 3)
+                training_data.append(np.asarray(img_rot_90cw))
+                img_count += 1
+                #Rotate 90CCW image
+                img_rot_90ccw = np.rot90(np.asarray(rot_img))
+                training_data.append(np.asarray(img_rot_90ccw))
+                img_count += 1
+
+            except IOError:
+                print("Error reading image! Skipping image.")
+                continue
+
+        training_data = np.reshape(training_data,(-1,x_dim,y_dim,channels))
+        training_data = training_data.astype(np.float32)
+        training_data = training_data / 127.5 - 1.
+
+        print(f'{img_count} images loaded.')
+        print("Saving training image binary...")
+        np.save(training_binary_path,training_data)
+        elapsed = time.time()-start
+        print (f'Done. Image preprocess time: {hms_string(elapsed)}')
+    else:
+        print("Loading previous training pickle...")
+        training_data = np.load(training_binary_path, allow_pickle=True)
+        print(f'Done. {len(training_data)} images loaded')
+
+    seed = np.random.randint(1, 10e6)
+    np.random.seed(seed)
+    np.random.shuffle(training_data)
+
+    return training_data
+
 # def label_bacteria_img(name, delim):
 #     word_label = name.split(delim)[0]
 #     if word_label == 'Escherichia.coli' : return np.array([1, 0])
@@ -809,7 +923,19 @@ def map_labels(labels):
         mapping[labels[x]] = x
     return mapping
 
-
+def img_rotate_and_crop(img, crop_w, crop_h, rot_amt=0):
+    img_w, img_h = img.size # Get dimensions
+    left = (img_w - crop_w)/2
+    top = (img_h - crop_h)/2
+    right = (img_w + crop_w)/2
+    bottom = (img_h + crop_h)/2
+    if(rot_amt == 0):
+        # Crop the center of the image
+        return img.crop((left, top, right, bottom))
+    else:
+        # Rotate then crop the center of the image
+        rot_img = img.rotate(rot_amt)
+        return rot_img.crop((left, top, right, bottom))
 
 # Nicely formatted time string
 def hms_string(sec_elapsed):
