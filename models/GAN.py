@@ -333,11 +333,21 @@ class GAN():
 
 
 
-
     def train_discriminator(self, x_train, batch_size, using_generator):
 
-        valid = np.ones((batch_size,1))
-        fake = np.zeros((batch_size,1))
+        # One-sided label smoothing. Using targets for real examples in the discriminator
+        # The idea is to replace the target for the real examples with a value
+        # slightly less than one (e.g. 0.9). This prevents extreme extrapolation
+        # behavior in the discriminator (e.g. keeping disciminator from approaching 0 loss too rapidly).
+        # So we want a value of 0.9 or targets with a stochastic range (e.g. 0.9-1.0)
+        # from Goodfellow, I. (2016). NIPS 2016 Tutorial: Generative Adversarial Networks.
+        # https://arxiv.org/abs/1701.00160
+        # I'm doing this for the fake examples too.
+        # apparently flipping the labels (Fake=True, Real=False) also helps
+        fake = np.random.uniform(low=0.9, high=1.0, size=batch_size)
+        valid = np.random.uniform(low=0.0, high=0.1, size=batch_size)
+        #fake = np.ones((batch_size,1))
+        #valid = np.zeros((batch_size,1))
 
         if using_generator:
             true_imgs = next(x_train)[0]
@@ -350,12 +360,13 @@ class GAN():
         noise = np.random.normal(0, 1, (batch_size, self.z_dim))
         gen_imgs = self.generator.predict(noise)
 
-        d_loss_real, d_acc_real =   self.discriminator.train_on_batch(true_imgs, valid)
-        d_loss_fake, d_acc_fake =   self.discriminator.train_on_batch(gen_imgs, fake)
+        d_loss_real, d_acc_real = self.discriminator.train_on_batch(true_imgs, valid)
+        d_loss_fake, d_acc_fake = self.discriminator.train_on_batch(gen_imgs, fake)
         d_loss =  0.5 * (d_loss_real + d_loss_fake)
         d_acc = 0.5 * (d_acc_real + d_acc_fake)
 
         return [d_loss, d_loss_real, d_loss_fake, d_acc, d_acc_real, d_acc_fake]
+
 
     def train_generator(self, batch_size):
         valid = np.ones((batch_size,1))
