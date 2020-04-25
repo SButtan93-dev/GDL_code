@@ -6,6 +6,7 @@ from tensorflow.keras import backend as K
 from tensorflow.keras.optimizers import Adam, RMSprop
 from tensorflow.keras.utils import plot_model
 from tensorflow.keras.initializers import RandomNormal
+from tensorflow.keras.losses import BinaryCrossentropy
 
 import numpy as np
 import json
