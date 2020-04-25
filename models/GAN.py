@@ -321,7 +321,7 @@ class GAN():
         # So we want a value of 0.9 or targets with a stochastic range (e.g. 0.9-1.0)
         # from Goodfellow, I. (2016). NIPS 2016 Tutorial: Generative Adversarial Networks.
         # https://arxiv.org/abs/1701.00160
-        loss = tensorflow.keras.losses.BinaryCrossentropy(label_smoothing=self.label_smoothing)
+        loss = BinaryCrossentropy(label_smoothing=self.label_smoothing)
         self.discriminator.compile(optimizer=self.get_opti(self.discriminator_learning_rate), loss=loss, metrics=['accuracy'])
         #self.discriminator.compile(optimizer=self.get_opti(self.discriminator_learning_rate), loss = 'binary_crossentropy', metrics = ['accuracy'])
 
