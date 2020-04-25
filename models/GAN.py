@@ -36,6 +36,7 @@ class GAN():
         , optimiser
         , z_dim
         , virtual_batch_size=None
+        , label_smoothing=None
         , preview_rows=5
         , preview_cols=5
         ):
@@ -62,6 +63,7 @@ class GAN():
         self.generator_learning_rate = generator_learning_rate
 
         self.virtual_batch_size = virtual_batch_size
+        self.label_smoothing = label_smoothing
         self.optimiser = optimiser
         self.z_dim = z_dim
 
@@ -311,11 +313,17 @@ class GAN():
 
         ### COMPILE DISCRIMINATOR
 
-        self.discriminator.compile(
-        optimizer=self.get_opti(self.discriminator_learning_rate)
-        , loss = 'binary_crossentropy'
-        ,  metrics = ['accuracy']
-        )
+        # One-sided label smoothing. Using targets for real examples in the discriminator
+        # The idea is to replace the target for the real examples with a value
+        # slightly less than one (e.g. 0.9). This prevents extreme extrapolation
+        # behavior in the discriminator (e.g. keeping disciminator from approaching 0 loss too rapidly).
+        # So we want a value of 0.9 or targets with a stochastic range (e.g. 0.9-1.0)
+        # from Goodfellow, I. (2016). NIPS 2016 Tutorial: Generative Adversarial Networks.
+        # https://arxiv.org/abs/1701.00160
+        loss = tensorflow.keras.losses.BinaryCrossentropy(label_smoothing=self.label_smoothing)
+        self.discriminator.compile(optimizer=self.get_opti(self.discriminator_learning_rate), loss=loss, metrics=['accuracy'])
+        #self.discriminator.compile(optimizer=self.get_opti(self.discriminator_learning_rate), loss = 'binary_crossentropy', metrics = ['accuracy'])
+
 
         ### COMPILE THE FULL GAN
 
@@ -325,7 +333,7 @@ class GAN():
         model_output = self.discriminator(self.generator(model_input))
         self.model = Model(model_input, model_output)
 
-        self.model.compile(optimizer=self.get_opti(self.generator_learning_rate) , loss='binary_crossentropy', metrics=['accuracy']
+        self.model.compile(optimizer=self.get_opti(self.generator_learning_rate), loss='binary_crossentropy', metrics=['accuracy']
         , experimental_run_tf_function=False
         )
 
@@ -334,17 +342,6 @@ class GAN():
 
 
     def train_discriminator(self, x_train, batch_size, using_generator):
-
-        # One-sided label smoothing. Using targets for real examples in the discriminator
-        # The idea is to replace the target for the real examples with a value
-        # slightly less than one (e.g. 0.9). This prevents extreme extrapolation
-        # behavior in the discriminator (e.g. keeping disciminator from approaching 0 loss too rapidly).
-        # So we want a value of 0.9 or targets with a stochastic range (e.g. 0.9-1.0)
-        # from Goodfellow, I. (2016). NIPS 2016 Tutorial: Generative Adversarial Networks.
-        # https://arxiv.org/abs/1701.00160
-        # I'm doing this for the fake examples too.
-        #valid = np.random.uniform(low=0.9, high=1.0, size=(batch_size,1))
-        #fake = np.random.uniform(low=0.0, high=0.1, size=(batch_size,1))
         valid = np.ones((batch_size,1))
         fake = np.zeros((batch_size,1))
 
@@ -450,6 +447,7 @@ class GAN():
                 , self.optimiser
                 , self.z_dim
                 , self.virtual_batch_size
+                , self.label_smoothing
                 , self.preview_rows
                 , self.preview_cols
                 ], f)
